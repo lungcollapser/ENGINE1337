@@ -2,10 +2,10 @@
 
 struct materials
 {
-  vec3 ambient;
-  vec3 diffuse;
   vec3 specular;
   float shininess;
+
+  sampler2D diffuse;
 };
 struct Light
 {
