@@ -88,13 +88,21 @@ void ProcessKeyboard(camera* cameraVal, Camera_Movement direction, float deltaTi
     {
         float velocity = cameraVal->MovementSpeed * deltaTime;
         if (direction == FORWARD)
+	  {
             cameraVal->Position += cameraVal->Front * velocity;
+	  }
         if (direction == BACKWARD)
+	  {
             cameraVal->Position -= cameraVal->Front * velocity;
+	  }
         if (direction == LEFT)
+	  {
             cameraVal->Position -= cameraVal->Right * velocity;
+	  }
         if (direction == RIGHT)
-            cameraVal->Position += cameraVal->Right * velocity;
+	  {
+	     cameraVal->Position += cameraVal->Right * velocity;
+	  }
 	if (direction == UP)
 	  {
 	    cameraVal->Position += cameraVal->Up * velocity;

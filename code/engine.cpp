@@ -21,8 +21,8 @@ typedef signed short int int16;
 typedef unsigned int uint16;
 
 static GLFWwindow* window;
-static int16 width = 800;
-static int16 height = 600;
+static int width = 800;
+static int height = 600;
 
 static float last_x = width / 2.0f; 
 static float last_y = height / 2.0f;
@@ -44,7 +44,7 @@ camera cameras;
 static float mix_value;
 static glm::vec3 objectPos = glm::vec3(1.0f,  0.0f, 0.0f);
 static glm::vec3 lightPos = glm::vec3(5.0f, 100.0f, -3.0f);
-static glm::vec3 planePos = glm::vec3(0.0f, -1.0f, 2.0f);
+static glm::vec3 planePos = glm::vec3(1.0f, 0.0f, 2.0f);
 
 
 int main()
@@ -177,25 +177,22 @@ float vertices[] = {
       lightPos.x = 2.0f + sin(glfwGetTime()) * 2.0f;
       lightPos.y = sin(glfwGetTime()) * -2.0f;
       lightPos.z = 2.0f + cos(glfwGetTime()) * 4.0f;
-      */
+      
       glm::vec3 light_color;
       light_color.x = sin(glfwGetTime() * 2.0f);
       light_color.y = sin(glfwGetTime() * 1.0);
       light_color.z = sin(glfwGetTime() * 1.3f);
-
+      */
+      
       glm::vec3 diffuse_color = light_color * glm::vec3(0.5f);
       glm::vec3 ambient_color = diffuse_color * glm::vec3(0.2f);
 
       Use(&light_shader);
       SetVec3(&light_shader, "light_pos", lightPos.x, lightPos.y, lightPos.z);
       SetVec3(&light_shader, "view_pos", cameras.Position.x, cameras.Position.y, cameras.Position.z);
-      SetVec3(&light_shader, "material.ambient", 1.0f, 0.5f, 0.31f);
-      SetVec3(&light_shader, "material.diffuse", 1.0f, 0.5f, 0.31f);
-      SetVec3(&light_shader, "material.specular", 0.5f, 0.5f, 0.5f);
-      SetFloat(&light_shader, "material.shininess", 32.0f);
 
-      SetVec3(&light_shader, "light.ambient", 0.5f, 0.5f, 0.5f);
-      SetVec3(&light_shader, "light.diffuse", 1.0f, 1.0f, 2.0f);
+      SetVec3(&light_shader, "light.ambient", 1.0f, 1.0f, 1.0f);
+      SetVec3(&light_shader, "light.diffuse", 1.0f, 1.0f, 1.0f);
       SetVec3(&light_shader, "light.specular", 1.0f, 1.0f, 1.0f);
       
       glm::mat4 view = glm::mat4(1.0f);
@@ -209,6 +206,10 @@ float vertices[] = {
       model = glm::translate(model, objectPos);
       model = glm::rotate(model, (float)glfwGetTime() * glm::radians(120.0f), glm::vec3(1.0f, 4.2f, 2.7f));
       SetMat4(&light_shader, "model", model);
+      SetVec3(&light_shader, "material.ambient", 0.0215f, 0.1745f, 0.0215f);
+      SetVec3(&light_shader, "material.diffuse", 0.07568f, 0.61424f, 0.07568f);
+      SetVec3(&light_shader, "material.specular", 0.633f, 0.727811f, 0.633f);
+      SetFloat(&light_shader, "material.shininess", 0.6f);
       
       glBindVertexArray(lighting_VAO);
       glDrawArrays(GL_TRIANGLES, 0, 36);
@@ -216,11 +217,29 @@ float vertices[] = {
       Use(&light_shader);
       model = glm::mat4(1.0f);
       model = glm::translate(model, planePos);
-      model = glm::scale(model, glm::vec3(10.0f, 0.5f, 20.0f));
+      model = glm::rotate(model, (float)glfwGetTime() * glm::radians(120.0f), glm::vec3(1.0f, 4.2f, 2.7f));
       SetMat4(&light_shader, "model", model);
-
+      SetVec3(&light_shader, "material.ambient", 0.5f, 0.0f, 0.0f);
+      SetVec3(&light_shader, "material.diffuse", 0.5f, 0.4f, 0.7f);
+      SetVec3(&light_shader, "material.specular", 0.7f, 0.04f, 0.04f);
+      SetFloat(&light_shader, "material.shininess", 0.078125f);
+      
       glBindVertexArray(lighting_VAO);
       glDrawArrays(GL_TRIANGLES, 0, 36);
+
+      Use(&light_shader);
+      model = glm::mat4(1.0f);
+      model = glm::translate(model, planePos * 2.5f);
+      model = glm::rotate(model, (float)glfwGetTime() * glm::radians(120.0f), glm::vec3(1.0f, 4.2f, 2.7f));
+      SetMat4(&light_shader, "model", model);
+      SetVec3(&light_shader, "material.ambient", 0.5f, 0.0f, 0.0f);
+      SetVec3(&light_shader, "material.diffuse", 0.5f, 0.4f, 0.7f);
+      SetVec3(&light_shader, "material.specular", 0.7f, 0.04f, 0.04f);
+      SetFloat(&light_shader, "material.shininess", 0.078125f);
+      
+      glBindVertexArray(lighting_VAO);
+      glDrawArrays(GL_TRIANGLES, 0, 36);
+
 
       Use(&cube_shader);
       SetMat4(&cube_shader, "view", view);
@@ -279,19 +298,19 @@ void process_input(GLFWwindow* window)
     }
   if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS)
     {
-      ProcessKeyboard(&cameras, UP, delta_time);
+      ProcessKeyboard(&cameras, DOWN, delta_time);
     }
   if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS)
     {
-      ProcessKeyboard(&cameras, DOWN, delta_time);
+      ProcessKeyboard(&cameras, UP, delta_time);
     }
   
   
 }
 void mouse_callback(GLFWwindow* window, double xposIn, double yposIn)
 {
-    float x_pos = static_cast<float>(xposIn);
-    float y_pos = static_cast<float>(yposIn);
+  float x_pos = static_cast<float>(xposIn);
+  float y_pos = static_cast<float>(yposIn);
 
     if (first_mouse)
     {
