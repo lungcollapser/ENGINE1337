@@ -26,16 +26,17 @@ uniform mat4 light_rotation;
 
 in vec3 normal;
 in vec3 frag_pos;
+in vec2 tex_coords;
 
 void main()
 {
 	
-	vec3 ambient = light.ambient * material.ambient;
+	vec3 ambient = light.ambient * vec3(texture(material.diffuse, tex_coords)).rgb;
 	
 	vec3 norm = normalize(normal);
 	vec3 light_direction = normalize(light_pos - frag_pos);
 	float diff = max(dot(norm, light_direction), 0.0);
-	vec3 diffuse = light.diffuse * (diff * material.diffuse);
+	vec3 diffuse = light.diffuse * diff * vec3(texture(material.diffuse, tex_coords)).rgb;
 
 	vec3 view_direction = normalize(view_pos - frag_pos);
 	vec3 reflect_direction = reflect(-light_direction, norm);
