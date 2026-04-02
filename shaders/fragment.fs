@@ -2,9 +2,10 @@
 
 struct materials
 {
-  vec3 specular;
   float shininess;
+  vec3 diffuseColor;
 
+  sampler2D specular;		
   sampler2D diffuse;
 };
 struct Light
@@ -22,7 +23,6 @@ uniform Light light;
 uniform materials material;
 uniform vec3 light_pos;
 uniform vec3 view_pos;
-uniform mat4 light_rotation;
 
 in vec3 normal;
 in vec3 frag_pos;
@@ -41,9 +41,8 @@ void main()
 	vec3 view_direction = normalize(view_pos - frag_pos);
 	vec3 reflect_direction = reflect(-light_direction, norm);
 	float spec = pow(max(dot(view_direction, reflect_direction), 0.0), material.shininess);
-	vec3 specular = light.specular * (spec * material.specular);
+	vec3 specular = light.specular * spec * material.diffuseColor;
 
-	vec3 result = ambient + diffuse + specular;
-	frag_color = vec4(result, 1.0);
+	frag_color = vec4(specular + ambient + diffuse, 1.0);
 	
 }
