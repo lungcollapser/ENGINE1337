@@ -45,6 +45,7 @@ camera cameras;
 static glm::vec3 objectPos = glm::vec3(1.0f,  0.0f, 0.0f);
 static glm::vec3 lightPos = glm::vec3(7.0f, 1.0f, -1.0f);
 static glm::vec3 planePos = glm::vec3(1.0f, 0.0f, 2.0f);
+static glm::vec3 diffuseColorChange;
 
 
 int main()
@@ -158,7 +159,7 @@ float vertices[] = {
   glEnableVertexAttribArray(0);
 
   
-  uint16 containerTex, containerSpecTex;
+  uint16 containerTex, containerSpecTex, emissionTex;
   
   glGenTextures(1, &containerTex);
 
@@ -202,6 +203,30 @@ float vertices[] = {
     }
   stbi_image_free(containerSpecData);
 
+  glGenTextures(1, &emissionTex);
+
+  glBindTexture(GL_TEXTURE_2D, emissionTex);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+  
+  unsigned char *emissionData = stbi_load("w:/art/matrix.jpg", &width, &height, &nrChannels, 0);
+  if (emissionData)
+    {
+      glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, emissionData);
+      glGenerateMipmap(GL_TEXTURE_2D);
+    }
+  else
+    {
+      printf("failed to load texture\n");
+    }
+  stbi_image_free(emissionData);
+  
+  Use(&light_shader);
+  SetInt(&light_shader, "material.diffuse", 0); 
+  SetInt(&light_shader, "material.specular", 1);
+  SetInt(&light_shader, "material.emission", 2);
     
   while(!glfwWindowShouldClose(window))
     {
@@ -209,6 +234,10 @@ float vertices[] = {
       float current_frame = glfwGetTime();
       delta_time = current_frame - last_frame;
       last_frame = current_frame;
+
+      diffuseColorChange.x = sin(glfwGetTime()) * 7.9f + 2.0f;
+      diffuseColorChange.y = sin(glfwGetTime()) * 3.3f;
+      diffuseColorChange.z = sin(glfwGetTime()) * 2.2f;
       
       process_input(window);
       ProcessMouseMovement(&cameras, 0.0f, 0.0f, true);
@@ -223,11 +252,12 @@ float vertices[] = {
 
       SetVec3(&light_shader, "light.ambient", 0.2f, 0.2f, 0.2f);
       SetVec3(&light_shader, "light.diffuse", 0.4f, 0.4f, 0.4f);
-      SetVec3(&light_shader, "light.specular", 2.0f, 1.0f, 1.0f);
+      SetVec3(&light_shader, "light.specular", 1.0f, 1.0f, 1.0f);
+      SetVec3(&light_shader, "light.emission", 1.0f, 1.0f, 1.0f);
 
-      SetVec3(&light_shader, "material.diffuseColor", 1.0f, 3.7f, 2.2f); 
-      SetInt(&light_shader, "material.specular", 0);
+      SetVec3(&light_shader, "material.diffuseColor", diffuseColorChange.x, diffuseColorChange.y, diffuseColorChange.z);
       SetFloat(&light_shader, "material.shininess", 64.0f);
+      SetVec2(&light_shader, "material.scale", 0.5f, 0.5f);
       
       glm::mat4 view = glm::mat4(1.0f);
       view = GetViewMatrix(&cameras);
@@ -249,6 +279,9 @@ float vertices[] = {
 
       glActiveTexture(GL_TEXTURE1);
       glBindTexture(GL_TEXTURE_2D, containerSpecTex);
+
+      glActiveTexture(GL_TEXTURE2);
+      glBindTexture(GL_TEXTURE_2D, emissionTex);
       
       glBindVertexArray(lighting_VAO);
       glDrawArrays(GL_TRIANGLES, 0, 36);
