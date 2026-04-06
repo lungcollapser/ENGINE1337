@@ -3,7 +3,7 @@
 /*glad and glfw for OpenGL*/
 #include <glad/glad.h>
 #include <glfw3.h>
-#include <stb_image.h>
+
 
 /*glm matrix and vectors*/
 #include <glm.hpp>
@@ -13,6 +13,7 @@
 /*other files/translation units*/
 #include <shader.h>
 #include <camera.h>
+#include <texture.h>
 
 #include <time.h>
 #include <cstdio>
@@ -175,8 +176,8 @@ float vertices[] = {
   glEnableVertexAttribArray(0);
 
   
-  uint16 containerTex, containerSpecTex, emissionTex;
-  
+  uint16 containerTex = 1, containerSpecTex = 2;
+  /*
   glGenTextures(1, &containerTex);
 
   glBindTexture(GL_TEXTURE_2D, containerTex);
@@ -197,6 +198,14 @@ float vertices[] = {
       printf("failed to load texture\n");
     }
   stbi_image_free(containerData);
+  */
+  unsigned char *containerData = 0;
+  unsigned char *containerSpecData = 0;
+  texture_gen(containerTex, containerData, "w:/art/container2.png");
+  texture_gen(containerSpecTex, containerSpecData, "w:/art/container2_specular.png");
+
+  /*
+  
   
   glGenTextures(1, &containerSpecTex); 
 
@@ -218,7 +227,7 @@ float vertices[] = {
       printf("failed to load texture\n");
     }
   stbi_image_free(containerSpecData);
-
+  */
   
   Use(&light_shader);
   SetInt(&light_shader, "material.diffuse", 0); 
@@ -248,8 +257,7 @@ float vertices[] = {
       SetVec3(&light_shader, "light.diffuse", 0.4f, 0.4f, 0.4f);
       SetVec3(&light_shader, "light.specular", 1.0f, 1.0f, 1.0f);
 
-      SetVec3(&light_shader, "material.diffuseColor", diffuseColorChange.x, diffuseColorChange.y, diffuseColorChange.z);
-      SetFloat(&light_shader, "material.shininess", 50.0f);
+      SetFloat(&light_shader, "material.shininess", 32.0f);
       
       glm::mat4 view = GetViewMatrix(&cameras);
       glm::mat4 projection = glm::perspective(glm::radians(60.0f), 1920.0f / 1080.0f, 0.1f, 100.0f);
@@ -260,9 +268,10 @@ float vertices[] = {
       
       glActiveTexture(GL_TEXTURE0);
       glBindTexture(GL_TEXTURE_2D, containerTex);
-      
+
       glActiveTexture(GL_TEXTURE1);
       glBindTexture(GL_TEXTURE_2D, containerSpecTex);
+      
 
       glBindVertexArray(lighting_VAO);
 
