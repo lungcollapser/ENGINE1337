@@ -129,7 +129,23 @@ float vertices[] = {
         -0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  0.0f,  0.0f,
         -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  0.0f,  1.0f
     };
-  
+
+
+ glm::vec3 cubePositions[] =
+    {
+    glm::vec3( 0.0f,  0.0f,  0.0f), 
+    glm::vec3( 2.0f,  5.0f, -15.0f), 
+    glm::vec3(-1.5f, -2.2f, -2.5f),  
+    glm::vec3(-3.8f, -2.0f, -12.3f),  
+    glm::vec3( 2.4f, -0.4f, -3.5f),  
+    glm::vec3(-1.7f,  3.0f, -7.5f),  
+    glm::vec3( 1.3f, -2.0f, -2.5f),  
+    glm::vec3( 1.5f,  2.0f, -2.5f), 
+    glm::vec3( 1.5f,  0.2f, -1.5f), 
+    glm::vec3(-1.3f,  1.0f, -1.5f)  
+    }; 
+
+ 
  uint16 VBO, lighting_VAO;
   glGenVertexArrays(1, &lighting_VAO);
   glGenBuffers(1, &VBO);
@@ -203,30 +219,11 @@ float vertices[] = {
     }
   stbi_image_free(containerSpecData);
 
-  glGenTextures(1, &emissionTex);
-
-  glBindTexture(GL_TEXTURE_2D, emissionTex);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-  
-  unsigned char *emissionData = stbi_load("w:/art/matrix.jpg", &width, &height, &nrChannels, 0);
-  if (emissionData)
-    {
-      glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, emissionData);
-      glGenerateMipmap(GL_TEXTURE_2D);
-    }
-  else
-    {
-      printf("failed to load texture\n");
-    }
-  stbi_image_free(emissionData);
   
   Use(&light_shader);
   SetInt(&light_shader, "material.diffuse", 0); 
   SetInt(&light_shader, "material.specular", 1);
-  SetInt(&light_shader, "material.emission", 2);
+
     
   while(!glfwWindowShouldClose(window))
     {
@@ -235,9 +232,6 @@ float vertices[] = {
       delta_time = current_frame - last_frame;
       last_frame = current_frame;
 
-      diffuseColorChange.x = sin(glfwGetTime()) * 7.9f + 2.0f;
-      diffuseColorChange.y = sin(glfwGetTime()) * 3.3f;
-      diffuseColorChange.z = sin(glfwGetTime()) * 2.2f;
       
       process_input(window);
       ProcessMouseMovement(&cameras, 0.0f, 0.0f, true);
@@ -247,44 +241,42 @@ float vertices[] = {
       glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
       Use(&light_shader);
-      SetVec3(&light_shader, "light_pos", lightPos.x, lightPos.y, lightPos.z);
       SetVec3(&light_shader, "view_pos", cameras.Position.x, cameras.Position.y, cameras.Position.z);
 
+      SetVec3(&light_shader, "light.direction", -0.2f, -1.0f, -0.3f);
       SetVec3(&light_shader, "light.ambient", 0.2f, 0.2f, 0.2f);
       SetVec3(&light_shader, "light.diffuse", 0.4f, 0.4f, 0.4f);
       SetVec3(&light_shader, "light.specular", 1.0f, 1.0f, 1.0f);
-      SetVec3(&light_shader, "light.emission", 1.0f, 1.0f, 1.0f);
 
       SetVec3(&light_shader, "material.diffuseColor", diffuseColorChange.x, diffuseColorChange.y, diffuseColorChange.z);
-      SetFloat(&light_shader, "material.shininess", 64.0f);
-      SetVec2(&light_shader, "material.scale", 0.5f, 0.5f);
+      SetFloat(&light_shader, "material.shininess", 50.0f);
       
-      glm::mat4 view = glm::mat4(1.0f);
-      view = GetViewMatrix(&cameras);
-      
-      glm::mat4 projection = glm::mat4(1.0f);
-      projection = glm::perspective(glm::radians(60.0f), 1920.0f / 1080.0f, 0.1f, 100.0f);
-      
+      glm::mat4 view = GetViewMatrix(&cameras);
+      glm::mat4 projection = glm::perspective(glm::radians(60.0f), 1920.0f / 1080.0f, 0.1f, 100.0f);
       glm::mat4 model = glm::mat4(1.0f);
       SetMat4(&light_shader, "view", view);
-      SetMat4(&light_shader, "projection", projection); 
-
-      model = glm::mat4(1.0f);
-      model = glm::translate(model, objectPos);
+      SetMat4(&light_shader, "projection", projection);
       SetMat4(&light_shader, "model", model);
-
-
+      
       glActiveTexture(GL_TEXTURE0);
       glBindTexture(GL_TEXTURE_2D, containerTex);
-
+      
       glActiveTexture(GL_TEXTURE1);
       glBindTexture(GL_TEXTURE_2D, containerSpecTex);
 
-      glActiveTexture(GL_TEXTURE2);
-      glBindTexture(GL_TEXTURE_2D, emissionTex);
-      
       glBindVertexArray(lighting_VAO);
-      glDrawArrays(GL_TRIANGLES, 0, 36);
+
+      for (unsigned int i = 0; i < 10; i++)
+	{
+	  model = glm::mat4(1.0f);
+	  model = glm::translate(model, cubePositions[i]);
+	  float angle = 20.0 * i;
+	  model = glm::rotate(model, (float)glfwGetTime() * glm::radians(angle), glm::vec3(1.0f, 0.3f, 0.5f));
+	  SetMat4(&light_shader, "model", model);
+	  
+	  glDrawArrays(GL_TRIANGLES, 0, 36);
+
+	}      
 
       Use(&cube_shader);
       SetMat4(&cube_shader, "view", view);
@@ -306,7 +298,7 @@ float vertices[] = {
     }
 
   glDeleteVertexArrays(1, &lighting_VAO);
-  glDeleteVertexArrays(2, &light_cube_VAO);
+  glDeleteVertexArrays(1, &light_cube_VAO);
   glDeleteBuffers(1, &VBO);
 
   glfwTerminate();
@@ -372,4 +364,3 @@ void mouse_callback(GLFWwindow* window, double xposIn, double yposIn)
 
     ProcessMouseMovement(&cameras, x_offset, y_offset);
 }
-
