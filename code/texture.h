@@ -7,7 +7,8 @@
 #include <stb_image.h>
 #include <cstdio>
 
-void texture_gen(unsigned int texture, unsigned char* data, char texLocation[])
+
+void load_texture(unsigned int texture, char texLocation[])
 {
 
   glGenTextures(1, &texture);
@@ -19,7 +20,7 @@ void texture_gen(unsigned int texture, unsigned char* data, char texLocation[])
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
   int width, height, nrChannels;
-  data = stbi_load(texLocation, &width, &height, &nrChannels, 0);
+  unsigned char *data = stbi_load(texLocation, &width, &height, &nrChannels, 0);
   if (data)
     {
       glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);

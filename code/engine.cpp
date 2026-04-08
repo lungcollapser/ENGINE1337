@@ -46,8 +46,13 @@ camera cameras;
 static glm::vec3 objectPos = glm::vec3(1.0f,  0.0f, 0.0f);
 static glm::vec3 lightPos = glm::vec3(7.0f, 1.0f, -1.0f);
 static glm::vec3 planePos = glm::vec3(1.0f, 0.0f, 2.0f);
-static glm::vec3 diffuseColorChange;
 
+enum texture_id
+  {
+    FIRST = 1,
+    SECOND = 2,
+    THIRD = 3
+  };
 
 int main()
 {
@@ -175,59 +180,10 @@ float vertices[] = {
   glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
   glEnableVertexAttribArray(0);
 
-  
-  uint16 containerTex = 1, containerSpecTex = 2;
-  /*
-  glGenTextures(1, &containerTex);
 
-  glBindTexture(GL_TEXTURE_2D, containerTex);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-  
-  int width, height, nrChannels;
-  unsigned char *containerData = stbi_load("w:/art/container2.png", &width, &height, &nrChannels, 0);
-  if (containerData)
-    {
-      glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, containerData);
-      glGenerateMipmap(GL_TEXTURE_2D);
-    }
-  else
-    {
-      printf("failed to load texture\n");
-    }
-  stbi_image_free(containerData);
-  */
-  unsigned char *containerData = 0;
-  unsigned char *containerSpecData = 0;
-  texture_gen(containerTex, containerData, "w:/art/container2.png");
-  texture_gen(containerSpecTex, containerSpecData, "w:/art/container2_specular.png");
+  load_texture(FIRST, "w:/art/container2.png");
+  load_texture(SECOND, "w:/art/container2_specular.png");
 
-  /*
-  
-  
-  glGenTextures(1, &containerSpecTex); 
-
-  glBindTexture(GL_TEXTURE_2D, containerSpecTex);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-
-  unsigned char *containerSpecData = stbi_load("w:/art/container2_specular.png", &width, &height, &nrChannels, 0);
-    if (containerSpecData)
-    {
-      glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, containerSpecData);
-      glGenerateMipmap(GL_TEXTURE_2D);
-    }
-  else
-    {
-      printf("failed to load texture\n");
-    }
-  stbi_image_free(containerSpecData);
-  */
   
   Use(&light_shader);
   SetInt(&light_shader, "material.diffuse", 0); 
@@ -257,6 +213,12 @@ float vertices[] = {
       SetVec3(&light_shader, "light.diffuse", 0.4f, 0.4f, 0.4f);
       SetVec3(&light_shader, "light.specular", 1.0f, 1.0f, 1.0f);
 
+      SetFloat(&light_shader, "light.constant", 1.0f);
+      SetFloat(&light_shader, "light.linear", 0.09f);
+      SetFloat(&light_shader, "light.quadratic", 0.032f);
+
+      SetVec3(&light_shader, "cam_pos", cameras.Position.x, cameras.Position.y, cameras.Position.z);
+
       SetFloat(&light_shader, "material.shininess", 32.0f);
       
       glm::mat4 view = GetViewMatrix(&cameras);
@@ -267,10 +229,10 @@ float vertices[] = {
       SetMat4(&light_shader, "model", model);
       
       glActiveTexture(GL_TEXTURE0);
-      glBindTexture(GL_TEXTURE_2D, containerTex);
+      glBindTexture(GL_TEXTURE_2D, FIRST);
 
       glActiveTexture(GL_TEXTURE1);
-      glBindTexture(GL_TEXTURE_2D, containerSpecTex);
+      glBindTexture(GL_TEXTURE_2D, SECOND);
       
 
       glBindVertexArray(lighting_VAO);
@@ -278,9 +240,10 @@ float vertices[] = {
       for (unsigned int i = 0; i < 10; i++)
 	{
 	  model = glm::mat4(1.0f);
-	  model = glm::translate(model, cubePositions[i]);
-	  float angle = 20.0 * i;
+	  float angle = 20.0f * i;
 	  model = glm::rotate(model, (float)glfwGetTime() * glm::radians(angle), glm::vec3(1.0f, 0.3f, 0.5f));
+	  model = glm::translate(model, cubePositions[i]);
+
 	  SetMat4(&light_shader, "model", model);
 	  
 	  glDrawArrays(GL_TRIANGLES, 0, 36);
@@ -366,7 +329,7 @@ void mouse_callback(GLFWwindow* window, double xposIn, double yposIn)
     }
 
     float x_offset = x_pos - last_x;
-    float y_offset = last_y - y_pos; // reversed since y-coordinates go from bottom to top
+    float y_offset = last_y - y_pos; 
 
     last_x = x_pos;
     last_y = y_pos;
