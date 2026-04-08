@@ -5,7 +5,6 @@
 #include <glm.hpp>
 #include <gtc/matrix_transform.hpp>
 
-// Defines several possible options for camera movement. Used as abstraction to stay away from window-system specific input methods
 enum Camera_Movement {
     FORWARD,
     BACKWARD,
@@ -15,7 +14,6 @@ enum Camera_Movement {
     DOWN
 };
 
-// Default camera values
 const float YAW         = -90.0f;
 const float PITCH       =  0.0f;
 const float SPEED       =  4.5f;
@@ -25,16 +23,13 @@ const float ZOOM        =  45.0f;
 
 struct camera
 {
-    // camera Attributes
     glm::vec3 Position;
     glm::vec3 Front;
     glm::vec3 Up;
     glm::vec3 Right;
     glm::vec3 WorldUp;
-    // euler Angles
     float Yaw;
     float Pitch;
-    // camera options
     float MovementSpeed;
     float MouseSensitivity;
     float Zoom;
@@ -43,15 +38,14 @@ struct camera
 
 void updateCameraVectors(camera* cameraVal)
 {
-        // calculate the new Front vector
+
         glm::vec3 front;
         front.x = cos(glm::radians(cameraVal->Yaw)) * cos(glm::radians(cameraVal->Pitch));
         front.y = sin(glm::radians(cameraVal->Pitch));
         front.z = sin(glm::radians(cameraVal->Yaw)) * cos(glm::radians(cameraVal->Pitch));
         cameraVal->Front = glm::normalize(front);
-        // also re-calculate the Right and Up vector
-        cameraVal->Right = glm::normalize(glm::cross(cameraVal->Front, cameraVal->WorldUp));  // normalize the vectors, because their length gets closer to 0 the more you look up or down which results in slower movement.
-        cameraVal->Up    = glm::normalize(glm::cross(cameraVal->Right, cameraVal->Front));
+        cameraVal->Right = glm::normalize(glm::cross(cameraVal->Front, cameraVal->WorldUp)); 
+        cameraVal->Up = glm::normalize(glm::cross(cameraVal->Right, cameraVal->Front));
 }
     // constructor with vectors
 inline void CameraInitVec(camera* cameraVal) 
