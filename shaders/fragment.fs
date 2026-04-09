@@ -28,6 +28,7 @@ out vec4 frag_color;
 uniform Light light;
 uniform materials material;
 uniform vec3 viewPos;
+uniform bool flash;
 
 in vec3 normal;
 in vec3 frag_pos;
@@ -38,7 +39,7 @@ void main()
 	vec3 lightDir = normalize(light.position - frag_pos);
 	float theta = dot(lightDir, normalize(-light.direction));
 
-	if (theta > light.cutOff)
+	if (theta > light.cutOff && flash == true)
 	{
 
 	vec3 ambient = light.ambient * vec3(texture(material.diffuse, tex_coords)).rgb;

@@ -33,6 +33,8 @@ static bool first_mouse = true;
 static float delta_time = 0.0f;
 static float last_frame = 0.0f;
 
+static bool isFlashOn = true;
+
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void mouse_callback(GLFWwindow* window, double xposIn, double yposIn);
@@ -188,10 +190,15 @@ float vertices[] = {
   Use(&light_shader);
   SetInt(&light_shader, "material.diffuse", 0); 
   SetInt(&light_shader, "material.specular", 1);
-
     
   while(!glfwWindowShouldClose(window))
     {
+
+      if (glfwGetKey(window, GLFW_KEY_F) == GLFW_PRESS)
+	{
+	  isFlashOn = !isFlashOn;
+	}
+
       
       float current_frame = glfwGetTime();
       delta_time = current_frame - last_frame;
@@ -220,6 +227,7 @@ float vertices[] = {
       SetVec3(&light_shader, "light.position", cameras.Position.x, cameras.Position.y, cameras.Position.z);
       SetVec3(&light_shader, "light.direction", cameras.Front.x, cameras.Front.y, cameras.Front.z);
       SetFloat(&light_shader, "light.cutOff", glm::cos(glm::radians(12.5f)));
+      SetInt(&light_shader, "flash", isFlashOn);
 
       SetFloat(&light_shader, "material.shininess", 32.0f);
       
@@ -242,7 +250,7 @@ float vertices[] = {
       for (unsigned int i = 0; i < 10; i++)
 	{
 	  model = glm::mat4(1.0f);
-	  float angle = 20.0f * i;
+	  float angle = 10.0f * i;
 	  model = glm::rotate(model, (float)glfwGetTime() * glm::radians(angle), glm::vec3(1.0f, 0.3f, 0.5f));
 	  model = glm::translate(model, cubePositions[i]);
 
@@ -315,7 +323,6 @@ void process_input(GLFWwindow* window)
     {
       ProcessKeyboard(&cameras, UP, delta_time);
     }
-  
   
 }
 void mouse_callback(GLFWwindow* window, double xposIn, double yposIn)
