@@ -10,11 +10,9 @@ struct materials
 };
 struct Light
 {
-
-  vec3 lightDirection;
-  vec3 spotDirection;
-  float spotCutoff;
-  float spotTheta;
+  vec3 position;
+  vec3 direction;
+  float cutOff;
 
   vec3 ambient;
   vec3 diffuse;
@@ -37,34 +35,38 @@ in vec2 tex_coords;
 
 void main()
 {
+	vec3 lightDir = normalize(light.position - frag_pos);
+	float theta = dot(lightDir, normalize(-light.direction));
 
-
-	float distance = length(view - frag_pos);
-	float attenuation = 1.0 / (light.constant  + light.linear * distance + light.quadratic * (distance * distance));
+	if (theta > light.cutOff)
+	{
 
 	vec3 ambient = light.ambient * vec3(texture(material.diffuse, tex_coords)).rgb;
 	
 	vec3 norm = normalize(normal);
-	vec3 light_direction = normalize(lightDirection);
-	float diff = max(dot(norm, light_direction), 0.0);
+	vec3 light_direction = normalize(viewPos - frag_pos);
+	float diff = max(dot(norm, lightDir), 0.0);
 	vec3 diffuse = light.diffuse * diff * vec3(texture(material.diffuse, tex_coords)).rgb;
 
-	vec3 view_direction = normalize(view_pos - frag_pos);
-	vec3 reflect_direction = reflect(-light_direction, norm);
+	vec3 view_direction = normalize(viewPos - frag_pos);
+	vec3 reflect_direction = reflect(-lightDir, norm);
 	float spec = pow(max(dot(view_direction, reflect_direction), 0.0), material.shininess);
 	vec3 specular = light.specular * spec * vec3(texture(material.specular, tex_coords));
 
-	light.lightDirection = viewPos - frag_pos;
-	light.spotDirection = view_direction;
-	light.spotCutoff = 90.0;
-	light.spotTheta = cos(dot(light.lightDirection, spotDirection));
+	float distance = length(light.position - frag_pos);
+	float attenuation = 1.0 / (light.constant + light.linear * distance + light.quadratic * (distance * distance));
 
-
-	ambient *= attenuation;
 	diffuse *= attenuation;
 	specular *= attenuation;
 	
 	vec3 result = ambient + diffuse + specular;
 	frag_color = vec4(result, 1.0);
+	
+	}
+	else
+	{
+	frag_color = vec4(light.ambient * vec3(texture(material.diffuse, tex_coords)), 1.0);
+	}
+
 	
 }

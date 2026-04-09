@@ -217,6 +217,10 @@ float vertices[] = {
       SetFloat(&light_shader, "light.linear", 0.09f);
       SetFloat(&light_shader, "light.quadratic", 0.032f);
 
+      SetVec3(&light_shader, "light.position", cameras.Position.x, cameras.Position.y, cameras.Position.z);
+      SetVec3(&light_shader, "light.direction", cameras.Front.x, cameras.Front.y, cameras.Front.z);
+      SetFloat(&light_shader, "light.cutOff", glm::cos(glm::radians(12.5f)));
+
       SetFloat(&light_shader, "material.shininess", 32.0f);
       
       glm::mat4 view = GetViewMatrix(&cameras);
