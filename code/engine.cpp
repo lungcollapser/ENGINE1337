@@ -226,7 +226,9 @@ float vertices[] = {
 
       SetVec3(&light_shader, "light.position", cameras.Position.x, cameras.Position.y, cameras.Position.z);
       SetVec3(&light_shader, "light.direction", cameras.Front.x, cameras.Front.y, cameras.Front.z);
-      SetFloat(&light_shader, "light.cutOff", glm::cos(glm::radians(12.5f)));
+      SetFloat(&light_shader, "light.innerCone", glm::cos(glm::radians(12.5f)));
+      SetFloat(&light_shader, "light.outerCone", glm::cos(glm::radians(17.5f)));
+      
       SetInt(&light_shader, "flash", isFlashOn);
 
       SetFloat(&light_shader, "material.shininess", 32.0f);
