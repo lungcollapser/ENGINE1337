@@ -1,0 +1,17 @@
+#ifndef DYNAMIC_H
+#define DYNAMIC_H
+
+#include <cstdio>
+
+typedef struct
+{
+  void *(*alloc)(size_t b
+} Allocator;
+
+typedef struct
+{
+  size_t length;
+  size_t capacity;
+  size_t padding;
+  Allocator *a;
+} arrayHeader;
