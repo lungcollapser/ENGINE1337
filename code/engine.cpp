@@ -93,8 +93,8 @@ int main()
   glfwSetCursorPosCallback(window, mouse_callback);
   glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
-  ShaderInit(&cube_shader, "z:/shaders/lightvertex.vs", "z:/shaders/lightfragment.fs");
-  ShaderInit(&model_shader, "z:/shaders/model_loading.vs", "z:/shaders/model_loading.fs");
+  ShaderInit(&cube_shader, "e:/engine/shaders/lightvertex.vs", "e:/engine/shaders/lightfragment.fs");
+  ShaderInit(&model_shader, "e:/engine/shaders/model_loading.vs", "e:/engine/shaders/model_loading.fs");
 
 
 float vertices[] = {
@@ -167,7 +167,7 @@ float vertices[] = {
  
  glEnable(GL_DEPTH_TEST);
  
- modelInit(&models, &buffer, "z:/models/7ligmas/ParkBenches/Models/obj/Bench_01_a.obj");
+ modelInit(&models, &buffer, "e:/engine/models/7ligmas/ParkBenches/Models/obj/Bench_01_a.obj");
     
   while(!glfwWindowShouldClose(window))
     {
