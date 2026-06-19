@@ -27,6 +27,7 @@ struct spot_light
 {
    float innerCone;
    float outerCone;
+   
 }
 uniform point_light point;
 uniform materials mat;

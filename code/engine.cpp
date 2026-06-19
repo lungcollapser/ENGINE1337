@@ -18,23 +18,18 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#define SCREENWIDTH 800
+#define SCREENHEIGHT 600
 
 typedef signed short int int16;
 typedef unsigned int uint16;
 
-static GLFWwindow* window;
-static int width = 800;
-static int height = 600;
-
-static float last_x = width / 2.0f; 
-static float last_y = height / 2.0f;
+static float last_x = SCREENWIDTH / 2.0f; 
+static float last_y = SCREENHEIGHT / 3.0f;
 static bool first_mouse = true;
 
 static float delta_time = 0.0f;
 static float last_frame = 0.0f;
-
-static bool isFlashOn = true;
-
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void mouse_callback(GLFWwindow* window, double xposIn, double yposIn);
@@ -44,21 +39,10 @@ shader light_shader;
 shader cube_shader;
 shader model_shader;
 camera cameras;
-Model models;
+Model parkBench1;
+Model parkBench2;
 Buffer buffer;
 Texture texture;
-
-
-static glm::vec3 objectPos = glm::vec3(1.0f,  0.0f, 0.0f);
-static glm::vec3 lightPos = glm::vec3(7.0f, 1.0f, -1.0f);
-static glm::vec3 planePos = glm::vec3(1.0f, 0.0f, 2.0f);
-
-enum texture_id
-  {
-    FIRST = 1,
-    SECOND = 2,
-    THIRD = 3
-  };
 
 int main()
 {
@@ -70,8 +54,9 @@ int main()
   glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
   glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
   glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-
-  window = glfwCreateWindow(width, height, "Engine", NULL, NULL);
+  
+  GLFWwindow* window;
+  window = glfwCreateWindow(SCREENWIDTH, SCREENHEIGHT, "Engine", NULL, NULL);
   if (window == NULL)
     {
       printf("failed to create glfw window");
@@ -87,7 +72,7 @@ int main()
      return -1;
    }
 
-  glViewport(0, 0, width, height);
+  glViewport(0, 0, SCREENWIDTH, SCREENHEIGHT);
   glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
   CameraInitVec(&cameras);
   glfwSetCursorPosCallback(window, mouse_callback);
@@ -167,7 +152,8 @@ float vertices[] = {
  
  glEnable(GL_DEPTH_TEST);
  
- modelInit(&models, &buffer, "e:/engine/models/7ligmas/ParkBenches/Models/obj/Bench_01_a.obj");
+ modelInit(&parkBench1, &buffer, "e:/engine/models/7ligmas/ParkBenches/Models/obj/Bench_01_a.obj");
+ modelInit(&parkBench2, &buffer, "e:/engine/models/7ligmas/ParkBenches/Models/obj/benchtest.obj");
     
   while(!glfwWindowShouldClose(window))
     {
@@ -180,34 +166,52 @@ float vertices[] = {
       process_input(window);
       ProcessMouseMovement(&cameras, 0.0f, 0.0f, true);
       
-      glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
+      glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
       glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
       Use(&model_shader);
 
       SetVec3(&model_shader, "viewPos", cameras.Position);
-      SetFloat(&model_shader, "shininess", 32.0f);
 
-      SetVec3(&model_shader, "point.position", pointLightPositions[0]);
-      SetVec3(&model_shader, "point.ambient", 0.5f, 0.5f, 0.5f);
-      SetVec3(&model_shader, "point.diffuse", 0.8f, 0.8f, 0.8f);
-      SetVec3(&model_shader, "point.specular", 1.0f, 1.0f, 1.0f);
+      SetVec3(&model_shader, "mat.position", pointLightPositions[0]);
+      SetVec3(&model_shader, "mat.ambient", 0.5f, 0.5f, 0.5f);
+      SetVec3(&model_shader, "mat.diffuse", 0.8f, 0.8f, 0.8f);
+      SetVec3(&model_shader, "mat.specular", 1.0f, 1.0f, 1.0f);
       SetFloat(&model_shader, "point.constant", 1.0f);
       SetFloat(&model_shader, "point.linear", 0.09f);
       SetFloat(&model_shader, "point.quadratic", 0.032f);
+      SetFloat(&model_shader, "mat.shininess", 32.0f);
       
-
       glm::mat4 view = GetViewMatrix(&cameras);
-      glm::mat4 projection = glm::perspective(glm::radians(60.0f), (float)width / (float)height, 0.1f, 100.0f);
+      glm::mat4 projection = glm::perspective(glm::radians(60.0f), (float)SCREENWIDTH / (float)SCREENHEIGHT, 0.1f, 100.0f);
       glm::mat4 model = glm::mat4(1.0f);
       SetMat4(&model_shader, "view", view);
       SetMat4(&model_shader, "projection", projection);
 
-      model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f));
+      model = glm::translate(model, glm::vec3(0.0f, 0.0f, -5.0f));
+      model = glm::scale(model, glm::vec3(1.0f, 1.0f, 1.0f));
+      model = glm::rotate(model, (float) glfwGetTime() * glm::radians(90.0f), glm::vec3(5.0f,-3.2f, 3.3f));
+      SetMat4(&model_shader, "model", model);
+      drawModel(&parkBench1, &buffer, &model_shader);
+
+       Use(&model_shader);
+
+      SetVec3(&model_shader, "viewPos", cameras.Position);
+
+      SetVec3(&model_shader, "mat.position", pointLightPositions[0]);
+      SetVec3(&model_shader, "mat.ambient", 0.5f, 0.5f, 0.5f);
+      SetVec3(&model_shader, "mat.diffuse", 0.8f, 0.8f, 0.8f);
+      SetVec3(&model_shader, "mat.specular", 0.0f, 0.0f, 0.0f);
+      SetFloat(&model_shader, "point.constant", 1.0f);
+      SetFloat(&model_shader, "point.linear", 0.09f);
+      SetFloat(&model_shader, "point.quadratic", 0.032f);
+      SetFloat(&model_shader, "mat.shininess", 32.0f);
+      
+      model = glm::mat4(1.0f);
+      model = glm::translate(model, glm::vec3(2.0f, 0.0f, 0.0f));
       model = glm::scale(model, glm::vec3(1.0f, 1.0f, 1.0f));
       SetMat4(&model_shader, "model", model);
-      drawModel(&models, &buffer, &model_shader);
-
+      drawModel(&parkBench2, &buffer, &model_shader);
       
       Use(&cube_shader);
       SetMat4(&cube_shader, "view", view);
