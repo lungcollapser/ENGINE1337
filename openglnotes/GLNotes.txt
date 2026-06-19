@@ -1,0 +1,142 @@
+OpenGL Notes
+
+Glad: An extension/helper library that allows us to use modern OpenGL functionality. The manufactures and OS only allow up to 1.3 OpenGL so loading this allows us to use modern functions.
+
+GLFW: Similar to Glad, this is the source of how we do cross platform windows + gl context creation.
+
+OpenGL is basically one big state machine. It's an API, but see it as this.
+
+Graphics Pipeline: A process through the GPU that takes our 3D coordinates and transforms these to 2D pixels.
+
+Vertex Data: A list of three 3D coordinates that should form primitives in an array. A collection of vertices.
+
+Vertex: A collection of data per 3D coordinate. The vertex data is represented using Vertex Attributes.
+
+Primitives: Hints for OpenGL that allow us to tell it what types of render we want. Render as lines, a collection of points, etc.
+
+Vertex Shader: Allows for vertex attribute processing and turns 3D coordinates into different 3D coordinates.
+
+Geometry Shader: Takes the output of the vertex shader (optionally). It then takes these and has the ability to generate other shapes by emitting new vertices like a second triangle. This can save a lot of time and energy so you don't have to code multiple vertices data. This can be interchangeable from the vertex shader. 
+
+Primitive Assembly: AKA Shape Assembly. This assembles all the points from the vertex or geometry shader in the primitive shape given.
+
+Rasterization Stage: The output of the primitive stage is passed to this stage where it maps resulting primitives to the corresponding pixels on the final screen. This results in fragments for the fragment shader to use. Before the fragment shaders run, clipping is performed.
+
+Clipping: This discards all fragments that are outside of your view, increasing performance.
+
+Fragment: A fragment in OpenGL is all the data required for OpenGL to render a single pixel.
+
+Fragment Shader: This calculates the final color of a pixel and this is usually the stage where all the advanced OpenGL effects occur. Usually also contains data about the 3D scene (lights, shadows, color of the light, etc.)
+
+Alpha Test and Blending stage: This stage checks the corresponding depth (and stencil) value of the fragment and uses those to check if the resulting fragment is in front or behind other objects and should be discarded accordingly. It also checks for alpha values (opacity of an object) and blends the object accordingly.
+
+Normalized Device Coordinates: Coordinates for your vertices that are normalized from a range of -1.0 to 1.0. Coordinates within this range will appear on screen, and the ones that don't will be CLIPPED (LOOK UP FOR CLIPPED).
+
+Vertex Buffer Object (VBO): This manages our vertex data that we send to memory. Preferable to send in large batches if we have the memory. This is an OpenGL object. We can generate one with a buffer ID using glGenBuffers(). OpenGL has many types of buffer objects.
+
+Buffer Objects: A way to store data onto memory on the GPU. OpenGL has many types of buffer object. OPENGL ALLOWS YOU TO BIND TO SEVERAL BUFFERS AT ONCE AS LONG AS THEY HAVE A DIFFERENT BUFFER TYPE!!! V IMPORTANT
+
+Perspective Division: Not a position in space and not 4D. Idk cuh.
+
+Runtime: Software/Instructions that are executed WHILE your program is running. 
+
+Shader Object: What needs to be created to combine/link multiple shaders together. Sort of how linking in c works with multiple translation units, but in this with have to specify what we want to link and how.
+
+Vertex Attribute: Allows us to give our vertex data for attributes on we want OpenGL to sort through the buffer data to draw.
+
+Vertex Array Object (VAO): Stores vertex attributes so we only have to assign whatever object we want to it without having to write a vertex attribute for every object.
+
+Indexed Drawing: Done with the EBO Element Buffer Object. This allows for us to declare indices and then tell OpenGL how to use this indices to iterate through our vertices to draw multiple things like triangles.
+
+Each input variable in the vertex shader are known as vertex attributes.
+
+N in vertex shader means number of components.
+
+It seems that when you try to create an output the fragment shader while have two fragment shaders, the color you are out-ing makes both shapes that color. Possibly need to create two vertex shaders.
+
+Shaders are programs that pass data on the CPU to the GPU (simple way to remember). Uniforms are another way to pass this data but they are global (think of it like static sort of kinda in C++ for variables. This means we can define them anywhere in the shader process aka outside of the vertex shader code). Exactly like static too they will also keep their values until they are reset or updated.
+
+Fragment Interpolation: Applied to every fragment shader input. During the rasterization phase, the fragment shader interpolates colors to give them a flow from one color to the next if on the same object. Look more into later. 
+
+Getting the texture color with our texture coordinates is called sampling.
+
+STR are texture coordinates axis corresponding to XYZ with certain texture functions.
+
+Texture Wrapping: Once a textures coordinates go over the range of 0, 0 or 1, 1 or even if they dont Opengl lets us specify for how to texture should react. LOOK UP THESE OPTIONS
+
+Texture Pixel = Texel
+
+Texture Filtering: Allows us to filter the textures to compensate for low resolution textures of high resolution monitors ect.
+
+Artifacts on objects occur when you are trying to render high resolution textures to objects far away or even small objects. This is where Mipmaps are helpful.
+
+Mipmaps are used depending on the distance of the object to the viewer. It reduces the texture size to avoid artifacts appearing. Lowers the resolution for distant objects
+
+Texture Magnification doesn't use Mipmaps
+
+.png require RGBA to be declared in the TexImage2D function because it has an Alpha channel
+
+sampler2D(3D, 1D): when set to uniform in the fragment shader, this passes our texture from the vertex to the fragment shader.
+
+Z buffer is where all the depth information is stored in OpenGL (also known as the depth buffer).
+
+Phong lighting model: Consists of 3 components: ambient, diffuse, and specular lighting.
+
+Ambient lighting: Even when its dark, there is some light source somewhere so that small light is what we apply to our object.
+
+Diffuse lighting: Simulations the directional impact a light object has on an object.
+
+Specular lighting: Simulates the bright spot of a light that appears on shiny objects (overrated imo). More inclined to the color of the light than the object.
+
+Global illumination algorithms: Take into consideration light that reflects off of multiple objects hitting other objects. Indirection impact of lighting of an object.
+
+Normal vector: A vector that is perpendicular to the vertex surface.
+
+Vertex Position in world space can be achieved by multiplying the vertex position with the model matrix only.
+
+Always normalize vectors when doing light calculations to insure they're Unit Vectors.
+
+Normal Matrix: A matrix for normal vectors (unit vectors) to transform normal vectors to world space coordinates.
+
+Inverse matrices:
+
+Transpose matrices:
+
+Diffuse Maps: Mapping lighting to specific fragments for diffused lighting. This and specular maps are how we influence lighting on an object that has multiple materials.
+
+You can't instantiate opaque types like sampler2D.
+
+A light source that casts light upon objects is called a Light Caster.
+
+When an light objects rays are cast parallel it doesn't matter how each object relates since the light direction remains the same.
+
+We negate the light.direction because before we were calculating the fragment TOWARDS the light source, but with a directional light we want a global direction coming FROM the light source.
+
+Direction Vectors should have their w coordinate (if vec4) as 0.0 because we don't want to any transformations on them.
+
+Attenuation: To reduce light intensity for objects that are further away from the light source. This can be done using a linear equation.
+
+Dot Product: A projection, a shadow of one upon the other. If you have perpendicular vectors, no shadow is projected. If you have parallel vectors, you have the maximum. The result is a scalar, proportional to how much of the vector is covered by the others shadow.
+
+
+Cross product: The "area of the parallelogram" made between the vectors. Maxing out when pi/2. To get the right hand rule, remember that a plane can be defined by a normal vector, so which vector defines this area between these to vectors? One that is perpendicular to both. The result is a vector, proportional to that 'area'.
+
+UV-Mapping: The process of applying textures to imported models.
+
+Assimp: Open Asset Import Library is a library that allows you to import models data including meshes, materials, faces, and all vertex data including normals and texture coordinates.
+
+Recursion: When a function calls itself.
+
+Arrays in C are static meaning their size needs to be known at compile time. You can create dynamic arrays in C using malloc alloc and free but it seems difficult. THERE IS LIBRARIES FOR THIS. If you change the size of an array or try to write outside of it to something else, it is undefined behavior but it might actually work. It is up to the compiler which is retarded.
+
+Dynamic arrays in C++ are Vector (stupid name). We don't want to use this for compile times. 
+
+Metadata refers to data that provides information about other data.
+
+Aggregate Initialization in C: Vertex vert = {0}. Putting the 0 in curly braces initializes everything in this struct to 0. Doing Vertex vert = 0 doesn't work because this communicates with the compiler as if the struct is a scalar when it's not. VERY IMPORTANT AND COOL
+
+Assimp has several post-processing options for its ReadFile function; including adding normal if meshes don't have them, and optimizing meshes by joining several meshes into one large mesh which can reduce draw calls.
+
+Post-Processing: Processes that happen after the main process is done. Like finishing steps that can to happen afterward.
+
+      
